@@ -1,8 +1,8 @@
 Package: CCMMR
 Type: Package
 Title: Minimization of the Convex Clustering Loss Function
-Version: 0.1
-Date: 2023-04-13
+Version: 0.2
+Date: 2023-12-21
 Authors@R: c(person(given = "Daniel", 
                     family = "Touw", 
                     role = c("aut", "cre"),
@@ -28,9 +28,9 @@ Imports: RANN (>= 2.6.1), Rcpp (>= 1.0.7), methods (>= 4.1.0), graphics
 LinkingTo: Rcpp, RcppEigen
 NeedsCompilation: yes
 Depends: R (>= 4.1), stats (>= 4.1)
-Packaged: 2023-04-13 17:10:44 UTC; djwto
+Packaged: 2023-12-21 16:12:33 UTC; Daniel
 Author: Daniel Touw [aut, cre] (<https://orcid.org/0000-0003-3074-5401>),
   Patrick Groenen [aut] (<https://orcid.org/0000-0001-6683-8971>),
   Yoshikazu Terada [aut]
 Repository: CRAN
-Date/Publication: 2023-04-14 18:30:06 UTC
+Date/Publication: 2023-12-21 16:30:14 UTC

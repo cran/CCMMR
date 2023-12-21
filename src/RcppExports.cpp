@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // convex_clusterpath
-Rcpp::List convex_clusterpath(const Eigen::MatrixXd& X, const Eigen::MatrixXi& W_idx, const Eigen::VectorXd& W_val, const Eigen::VectorXd& lambdas, const double eps_conv, const double eps_fusions, const bool scale, const bool save_clusterpath, const int burnin_iter, const int max_iter_conv);
-RcppExport SEXP _CCMMR_convex_clusterpath(SEXP XSEXP, SEXP W_idxSEXP, SEXP W_valSEXP, SEXP lambdasSEXP, SEXP eps_convSEXP, SEXP eps_fusionsSEXP, SEXP scaleSEXP, SEXP save_clusterpathSEXP, SEXP burnin_iterSEXP, SEXP max_iter_convSEXP) {
+Rcpp::List convex_clusterpath(const Eigen::MatrixXd& X, const Eigen::MatrixXi& W_idx, const Eigen::VectorXd& W_val, const Eigen::VectorXd& lambdas, const Eigen::VectorXd& target_losses, double eps_conv, double eps_fusions, bool scale, bool save_clusterpath, bool use_target, bool save_losses, bool save_convergence_norms, int burnin_iter, int max_iter_conv);
+RcppExport SEXP _CCMMR_convex_clusterpath(SEXP XSEXP, SEXP W_idxSEXP, SEXP W_valSEXP, SEXP lambdasSEXP, SEXP target_lossesSEXP, SEXP eps_convSEXP, SEXP eps_fusionsSEXP, SEXP scaleSEXP, SEXP save_clusterpathSEXP, SEXP use_targetSEXP, SEXP save_lossesSEXP, SEXP save_convergence_normsSEXP, SEXP burnin_iterSEXP, SEXP max_iter_convSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,18 +21,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type W_idx(W_idxSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type W_val(W_valSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type lambdas(lambdasSEXP);
-    Rcpp::traits::input_parameter< const double >::type eps_conv(eps_convSEXP);
-    Rcpp::traits::input_parameter< const double >::type eps_fusions(eps_fusionsSEXP);
-    Rcpp::traits::input_parameter< const bool >::type scale(scaleSEXP);
-    Rcpp::traits::input_parameter< const bool >::type save_clusterpath(save_clusterpathSEXP);
-    Rcpp::traits::input_parameter< const int >::type burnin_iter(burnin_iterSEXP);
-    Rcpp::traits::input_parameter< const int >::type max_iter_conv(max_iter_convSEXP);
-    rcpp_result_gen = Rcpp::wrap(convex_clusterpath(X, W_idx, W_val, lambdas, eps_conv, eps_fusions, scale, save_clusterpath, burnin_iter, max_iter_conv));
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type target_losses(target_lossesSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_conv(eps_convSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_fusions(eps_fusionsSEXP);
+    Rcpp::traits::input_parameter< bool >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_clusterpath(save_clusterpathSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_target(use_targetSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_losses(save_lossesSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_convergence_norms(save_convergence_normsSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin_iter(burnin_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter_conv(max_iter_convSEXP);
+    rcpp_result_gen = Rcpp::wrap(convex_clusterpath(X, W_idx, W_val, lambdas, target_losses, eps_conv, eps_fusions, scale, save_clusterpath, use_target, save_losses, save_convergence_norms, burnin_iter, max_iter_conv));
     return rcpp_result_gen;
 END_RCPP
 }
 // convex_clustering
-Rcpp::List convex_clustering(const Eigen::MatrixXd& X, const Eigen::MatrixXi& W_idx, const Eigen::VectorXd& W_val, const double eps_conv, const double eps_fusions, const bool scale, const bool save_clusterpath, const int burnin_iter, const int max_iter_conv, const int target_low, const int target_high, const int max_iter_phase_1, const int max_iter_phase_2, const int verbose, const double lambda_init, const double factor);
+Rcpp::List convex_clustering(const Eigen::MatrixXd& X, const Eigen::MatrixXi& W_idx, const Eigen::VectorXd& W_val, double eps_conv, double eps_fusions, bool scale, bool save_clusterpath, int burnin_iter, int max_iter_conv, int target_low, int target_high, int max_iter_phase_1, int max_iter_phase_2, int verbose, double lambda_init, double factor);
 RcppExport SEXP _CCMMR_convex_clustering(SEXP XSEXP, SEXP W_idxSEXP, SEXP W_valSEXP, SEXP eps_convSEXP, SEXP eps_fusionsSEXP, SEXP scaleSEXP, SEXP save_clusterpathSEXP, SEXP burnin_iterSEXP, SEXP max_iter_convSEXP, SEXP target_lowSEXP, SEXP target_highSEXP, SEXP max_iter_phase_1SEXP, SEXP max_iter_phase_2SEXP, SEXP verboseSEXP, SEXP lambda_initSEXP, SEXP factorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -40,19 +44,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type W_idx(W_idxSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type W_val(W_valSEXP);
-    Rcpp::traits::input_parameter< const double >::type eps_conv(eps_convSEXP);
-    Rcpp::traits::input_parameter< const double >::type eps_fusions(eps_fusionsSEXP);
-    Rcpp::traits::input_parameter< const bool >::type scale(scaleSEXP);
-    Rcpp::traits::input_parameter< const bool >::type save_clusterpath(save_clusterpathSEXP);
-    Rcpp::traits::input_parameter< const int >::type burnin_iter(burnin_iterSEXP);
-    Rcpp::traits::input_parameter< const int >::type max_iter_conv(max_iter_convSEXP);
-    Rcpp::traits::input_parameter< const int >::type target_low(target_lowSEXP);
-    Rcpp::traits::input_parameter< const int >::type target_high(target_highSEXP);
-    Rcpp::traits::input_parameter< const int >::type max_iter_phase_1(max_iter_phase_1SEXP);
-    Rcpp::traits::input_parameter< const int >::type max_iter_phase_2(max_iter_phase_2SEXP);
-    Rcpp::traits::input_parameter< const int >::type verbose(verboseSEXP);
-    Rcpp::traits::input_parameter< const double >::type lambda_init(lambda_initSEXP);
-    Rcpp::traits::input_parameter< const double >::type factor(factorSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_conv(eps_convSEXP);
+    Rcpp::traits::input_parameter< double >::type eps_fusions(eps_fusionsSEXP);
+    Rcpp::traits::input_parameter< bool >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< bool >::type save_clusterpath(save_clusterpathSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin_iter(burnin_iterSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter_conv(max_iter_convSEXP);
+    Rcpp::traits::input_parameter< int >::type target_low(target_lowSEXP);
+    Rcpp::traits::input_parameter< int >::type target_high(target_highSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter_phase_1(max_iter_phase_1SEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter_phase_2(max_iter_phase_2SEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_init(lambda_initSEXP);
+    Rcpp::traits::input_parameter< double >::type factor(factorSEXP);
     rcpp_result_gen = Rcpp::wrap(convex_clustering(X, W_idx, W_val, eps_conv, eps_fusions, scale, save_clusterpath, burnin_iter, max_iter_conv, target_low, target_high, max_iter_phase_1, max_iter_phase_2, verbose, lambda_init, factor));
     return rcpp_result_gen;
 END_RCPP
@@ -69,9 +73,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// find_mst
+Eigen::MatrixXi find_mst(const Eigen::MatrixXd& G);
+RcppExport SEXP _CCMMR_find_mst(SEXP GSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type G(GSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_mst(G));
+    return rcpp_result_gen;
+END_RCPP
+}
+// find_subgraphs
+Eigen::VectorXi find_subgraphs(const Eigen::MatrixXi& E, int n);
+RcppExport SEXP _CCMMR_find_subgraphs(SEXP ESEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXi& >::type E(ESEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_subgraphs(E, n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sparse_weights
-Rcpp::List sparse_weights(const Eigen::MatrixXd& X, const Eigen::MatrixXi& indices, const Eigen::MatrixXd& distances, const double phi, const int k, const bool connected, const bool scale);
-RcppExport SEXP _CCMMR_sparse_weights(SEXP XSEXP, SEXP indicesSEXP, SEXP distancesSEXP, SEXP phiSEXP, SEXP kSEXP, SEXP connectedSEXP, SEXP scaleSEXP) {
+Rcpp::List sparse_weights(const Eigen::MatrixXd& X, const Eigen::MatrixXi& indices, const Eigen::MatrixXd& distances, const double phi, const int k, const bool sym_circ, const bool scale);
+RcppExport SEXP _CCMMR_sparse_weights(SEXP XSEXP, SEXP indicesSEXP, SEXP distancesSEXP, SEXP phiSEXP, SEXP kSEXP, SEXP sym_circSEXP, SEXP scaleSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -80,17 +107,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type distances(distancesSEXP);
     Rcpp::traits::input_parameter< const double >::type phi(phiSEXP);
     Rcpp::traits::input_parameter< const int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< const bool >::type connected(connectedSEXP);
+    Rcpp::traits::input_parameter< const bool >::type sym_circ(sym_circSEXP);
     Rcpp::traits::input_parameter< const bool >::type scale(scaleSEXP);
-    rcpp_result_gen = Rcpp::wrap(sparse_weights(X, indices, distances, phi, k, connected, scale));
+    rcpp_result_gen = Rcpp::wrap(sparse_weights(X, indices, distances, phi, k, sym_circ, scale));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_CCMMR_convex_clusterpath", (DL_FUNC) &_CCMMR_convex_clusterpath, 10},
+    {"_CCMMR_convex_clusterpath", (DL_FUNC) &_CCMMR_convex_clusterpath, 14},
     {"_CCMMR_convex_clustering", (DL_FUNC) &_CCMMR_convex_clustering, 16},
     {"_CCMMR_fusion_threshold", (DL_FUNC) &_CCMMR_fusion_threshold, 2},
+    {"_CCMMR_find_mst", (DL_FUNC) &_CCMMR_find_mst, 1},
+    {"_CCMMR_find_subgraphs", (DL_FUNC) &_CCMMR_find_subgraphs, 2},
     {"_CCMMR_sparse_weights", (DL_FUNC) &_CCMMR_sparse_weights, 7},
     {NULL, NULL, 0}
 };
