@@ -1,3 +1,17 @@
+Changes in CCMMR version 0.2.2
+
+    + Fixed an integer overflow in the computation of the mean squared distance
+      used to scale the weights in sparse_weights(). For very large numbers of
+      observations this could produce incorrect weights (in some cases larger
+      than one).
+
+    + Fixed an off-by-one error in the median used to determine the default
+      fusion threshold, which could return a slightly incorrect value when the
+      number of pairwise distances was even.
+
+    + Added regression tests.
+
+
 Changes in CCMMR version 0.2
 
     + Added new option to guarantee a connected weight matrix in
