@@ -1,3 +1,13 @@
+Changes in CCMMR version 0.2.3
+
+    + Reduced the computation time of convex_clusterpath() without changing the
+      loss function values. The C++ solver now computes the fit term of the loss
+      from maintained aggregates instead of a full matrix product, skips the
+      fusion scan when no pairwise distance is small enough to trigger a fusion,
+      and rebuilds the cluster weight matrix directly from the fusion map rather
+      than forming sparse matrix products.
+
+
 Changes in CCMMR version 0.2.2
 
     + Fixed an integer overflow in the computation of the mean squared distance

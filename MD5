@@ -1,6 +1,6 @@
-9352cdba3be79f5ffef7a461e2ecc088 *DESCRIPTION
+b1b27b216e9e7bebae5554428f6dfe16 *DESCRIPTION
 1aac675df0ef02eeba41e1950063cf72 *NAMESPACE
-b61022be66d94bafe7556a6eaa0f466b *NEWS
+3e6701931a9ac7e56c97893ee6ae5ba5 *NEWS
 2a21f8c922054f5e09d6863f43b60f90 *R/RcppExports.R
 aa4c1aa4a4ce6c37d8a3e63aa6ceca5e *R/as.hclust.R
 bc113953d8cb8ca4e87a94602d36db79 *R/clusters.R
@@ -20,10 +20,10 @@ cb7be9a1d2ddb7b0fc32b3f008f3424d *man/plot.cvxclust.Rd
 b936d5947543250ddbfaecd950b7607c *man/sparse_weights.Rd
 ca6d29633417a91d76de160b7d9805ad *man/two_half_moons.Rd
 6c51fd7d5d0f0c5d47cb34da96cadddb *src/RcppExports.cpp
-9e51ad4b3abf533b5e224032ce3b45e0 *src/ccmm.cpp
+f9b586ee3665dcdcc807e3cd014088ed *src/ccmm.cpp
 46fbb611220cb81521dec6e0b7cef4dd *src/eps_fusions.cpp
 e06af8912deb0efcd7f8f71c18c6b7ac *src/graphs.cpp
 3fe52b3eb94914fcc9fddcc2fa19195a *src/weights.cpp
-c725db58d439582df37f4b29f9735e17 *tests/testthat.R
+6ed0174de6ade22a5d137176cdf83db1 *tests/testthat.R
 14d8cb78832d09db30a2ccad79bb8847 *tests/testthat/test-fusion-threshold.R
 b84399497f8ed4c82259b21fd0809de8 *tests/testthat/test-regression.R

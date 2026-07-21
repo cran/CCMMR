@@ -4,6 +4,8 @@
 #include <iostream>
 #include <algorithm>
 #include <list>
+#include <utility>
+#include <limits>
 
 //[[Rcpp::depends(RcppEigen)]]
 
@@ -53,6 +55,7 @@ struct CCMMConstants {
     double eps_fusions;
     double kappa_eps = 0.5;
     double kappa_pen = 1.0;
+    double sq_norm_X;
     int burn_in;
     int max_iter;
     bool use_target;
@@ -64,6 +67,9 @@ struct CCMMConstants {
                   X(X), eps_conv(eps_conv), eps_fusions(eps_fusions),
                   burn_in(burn_in), max_iter(max_iter), use_target(use_target)
     {
+        // Precompute ||X||^2 once for the fit term of the loss function
+        sq_norm_X = X.squaredNorm();
+
         // Scaling constants for the loss function
         if (scale) {
             double norm_X = X.norm();
@@ -94,18 +100,28 @@ struct CCMMVariables {
     double loss = 0;
     int n_iterations = 0;
 
+    // Smallest pairwise distance currently stored in D. Maintained by
+    // update_distances() so fuse() can skip the full fusion-candidate scan
+    // whenever no distance is small enough to trigger a fusion.
+    double min_distance = std::numeric_limits<double>::infinity();
+
 
     void update_distances()
     {
-        // Compute the pairwise distances
+        // Compute the pairwise distances, tracking the smallest one so that
+        // fuse() can cheaply rule out fusions without a separate scan.
+        double mn = std::numeric_limits<double>::infinity();
         for (int j = 0; j < D.outerSize(); j++) {
             for (Eigen::SparseMatrix<double>::InnerIterator it(D, j); it; ++it) {
                 int i = int(it.row());
                 if (i == j) continue;
 
-                it.valueRef() = (M.col(i) - M.col(j)).norm();
+                double d = (M.col(i) - M.col(j)).norm();
+                it.valueRef() = d;
+                if (d < mn) mn = d;
             }
         }
+        min_distance = mn;
     }
 
 
@@ -150,12 +166,14 @@ struct CCMMVariables {
 
     double loss_fusions(const CCMMConstants& constants, double lambda) const
     {
-        // TODO: Profile later with and without .noalias()
-        Eigen::MatrixXd temp;
-        temp.noalias() = constants.X - M * U.transpose();
-
-        // Paper equivalent: kappa_eps * ||X - UM||^2
-        double result = constants.kappa_eps * temp.squaredNorm();
+        // Paper equivalent: kappa_eps * ||X - U M||^2. Expand the squared
+        // norm and use the maintained aggregates XU = X * U and cluster_sizes
+        // (n_j): ||X - M U^T||^2 = ||X||^2 - 2 <XU, M> + sum_j n_j ||M_j||^2.
+        double cross = (XU.array() * M.array()).sum();
+        double fitted = (M.colwise().squaredNorm().transpose().array()
+                         * cluster_sizes).sum();
+        double fit = constants.sq_norm_X - 2.0 * cross + fitted;
+        double result = constants.kappa_eps * fit;
 
         // Initialize sum for penalty term
         double penalty = 0.0;
@@ -255,7 +273,9 @@ struct CCMMVariables {
     }
 
 
-    Eigen::SparseMatrix<double> fusion_candidates(double eps_fusions)
+    Eigen::SparseMatrix<double> fusion_candidates(double eps_fusions,
+                                                  int& n_clusters_new,
+                                                  Eigen::ArrayXi& membership)
     {
         // Preliminaries
         int n = int(M.cols());
@@ -286,6 +306,20 @@ struct CCMMVariables {
             }
         }
 
+        // Number of clusters after this fusion pass
+        n_clusters_new = cluster - 1;
+
+        // If no clusters were merged, the membership matrix would just be the
+        // identity. Skip constructing it entirely; the caller detects the
+        // no-fusion case via n_clusters_new == n and does no work.
+        if (n_clusters_new == n) {
+            return Eigen::SparseMatrix<double>();
+        }
+
+        // Hand the (0-based) membership out so the caller can aggregate UWU
+        // without forming explicit matrix products
+        membership = cluster_membership - 1;
+
         // Make a set of triplets from which to fill the new membership matrix
         // of the form (i, j, value)
         std::vector<Eigen::Triplet<int>> elements(n);
@@ -304,14 +338,49 @@ struct CCMMVariables {
 
     bool fuse(double eps_fusions, double lambda)
     {
-        auto U_new = fusion_candidates(eps_fusions);
+        // A fusion can only happen if some pairwise distance is at or below
+        // eps_fusions.
+        if (min_distance > eps_fusions) {
+            return false;
+        }
 
-        if (U_new.rows() > U_new.cols()) {
-            // Computation of updated lower triangular part of UWU
-            UWU = U_new.transpose() * UWU * U_new;
-            Eigen::SparseMatrix<double> lt = UWU.triangularView<Eigen::Lower>();
-            Eigen::SparseMatrix<double> utt = UWU.triangularView<Eigen::Upper>().transpose();
-            UWU = lt + utt;
+        int n_clusters_new;
+        Eigen::ArrayXi membership;
+        auto U_new = fusion_candidates(eps_fusions, n_clusters_new, membership);
+
+        if (n_clusters_new < int(M.cols())) {
+            // Aggregate UWU into the new cluster weight matrix. This is
+            // mathematically equal to the strictly-lower-triangular part of
+            // U_new^T * UWU * U_new (the only part the solver ever reads), but
+            // computed directly from the membership map in O(nnz) instead of
+            // forming two sparse matrix products.
+            //
+            // UWU is stored strictly lower triangular (row > col), so each
+            // off-diagonal weight between two old clusters is visited once.
+            // Old clusters that merge into the same new cluster (a == b) fall
+            // on the diagonal, which is never read, so they are dropped.
+            {
+                std::vector<Eigen::Triplet<double>> agg;
+                agg.reserve(UWU.nonZeros());
+
+                for (int j = 0; j < UWU.outerSize(); j++) {
+                    int b0 = membership(j);
+                    for (Eigen::SparseMatrix<double>::InnerIterator it(UWU, j); it; ++it) {
+                        int a = membership(int(it.row()));
+                        int b = b0;
+
+                        if (a == b) continue;
+                        if (a < b) std::swap(a, b);
+
+                        agg.emplace_back(a, b, it.value());
+                    }
+                }
+
+                Eigen::SparseMatrix<double> UWU_new(n_clusters_new, n_clusters_new);
+                UWU_new.setFromTriplets(agg.begin(), agg.end());
+                UWU_new.makeCompressed();
+                UWU = UWU_new;
+            }
 
             // Update of XU
             XU = XU * U_new;
@@ -403,9 +472,11 @@ struct CCMMVariables {
 
             // Set distances based on the new clusters
             set_distances();
+
+            return true;
         }
 
-        return U_new.rows() > U_new.cols();
+        return false;
     }
 
 
